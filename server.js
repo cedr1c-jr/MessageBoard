@@ -1,7 +1,8 @@
 import express from "express";
-import { getMessages, getMessageById, createMessage } from './db.js';
+import { getMessages, getMessageById, createMessage, createUser, getUserByUsername } from './db.js';
 const app = express();
 const PORT = 3000;
+app.use(express.json());
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -42,6 +43,27 @@ app.delete("/messages/:id", async (req, res) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send("Something went wrong!");
+});
+
+app.post("/login", (req, res) => {
+    const { username, password } = req.body;
+    const user = getUserByUsername(username);
+    if (user && user.password === password) {
+        res.redirect("/messages");
+    } else {
+        res.status(401).send("Invalid username or password");
+    }
+});
+
+app.post("/register", async (req, res) => {
+    const { username, password} = req.body;
+    if (username && password) {
+        await createUser(username, password);
+        res.redirect("/login"); 
+    } else {
+        res.status(400).send("Bad Request")
+    }
+    
 });
 
 app.use(express.static("public"));
