@@ -37,4 +37,14 @@ export async function getUserByUsername(username) {
 export async function createUser(username, password) {
     const [result] = await db.query("INSERT INTO users (username, password) VALUES (?, ?)", [username, password]);
     return result.username;
+};
+
+export async function getUsers() {
+    const [result] = await db.query("SELECT * FROM users")
+    return result;
+};
+
+export async function updatePassword(username, password) {
+    const [result] = await db.query("UPDATE users SET password = ? WHERE username = ?", [password, username]);
+    return;
 }
