@@ -44,21 +44,6 @@ app.delete("/messages/:id", async (req, res) => {
     }
 });
 
-app.post("/login", async (req, res) => {
-    const { username, password } = req.body;
-    if (typeof username !== "string" || typeof password !== "string") {
-        return res.status(400).send("Username and password are required");
-    }
-
-    const user = await db.getUserByUsername(username);
-    if (user && await bcrypt.compare(password, user.password)) {
-        const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-        res.json({ accessToken: accessToken })
-    } else {
-        return res.status(401).send("Invalid username or password");
-    }
-});
-
 app.get("/login", async (req, res) => {
     res.render('login.ejs');
 });

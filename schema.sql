@@ -13,5 +13,14 @@ CREATE TABLE messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE refreshtokens (
+    id int AUTO_INCREMENT PRIMARY KEY,
+    user_id int NOT NULL,
+    token CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 INSERT INTO users (username) VALUES ('CJ');
 INSERT INTO messages (user_id, message) VALUES (1, 'Hello, this is a test message.');

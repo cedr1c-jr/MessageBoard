@@ -46,5 +46,41 @@ export async function getUsers() {
 
 export async function updatePassword(username, password) {
     const [result] = await db.query("UPDATE users SET password = ? WHERE username = ?", [password, username]);
-    return;
-}
+    return result.insertId;
+};
+
+export async function pushRefreshToken(user_id, tokenHash, expires_at) {
+    const [result] = await db.query("INSERT INTO refreshtokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)", [user_id, tokenHash, expires_at]);
+    return result.insertId;
+};
+
+export async function getRefreshToken(tokenHash) {
+    const [rows] = await db.query(
+        "SELECT * FROM refresh_tokens WHERE token_hash = ? AND expires_at > NOW()",
+        [tokenHash]
+    );
+    return rows[0];
+};
+
+export async function deleteRefreshToken(tokenHash) {
+    const [result] = await db.query(
+        "DELETE FROM refresh_tokens WHERE token_hash = ?",
+        [tokenHash]
+    );
+    return result.affectedRows > 0;
+};
+
+export async function deleteAllRefreshTokensForUser(userId) {
+    const [result] = await db.query(
+        "DELETE FROM refresh_tokens WHERE user_id = ?",
+        [userId]
+    );
+    return result.affectedRows;
+};
+
+export async function deleteExpiredRefreshTokens() {
+    const [result] = await db.query(
+        "DELETE FROM refresh_tokens WHERE expires_at < NOW()"
+    );
+    return result.affectedRows;
+};
