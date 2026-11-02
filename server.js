@@ -2,14 +2,17 @@ import express from "express";
 import * as db from './db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+import cookieParser from 'cookie-parser';
+dotenv.config();
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
 
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.get("/", async (req, res) => {
     res.render("index.ejs");
@@ -20,7 +23,7 @@ app.get("/messages", async (req, res) => {
     res.render("messages.ejs", { messages });
 });
 
-app.get("/createMessage", async (req, res) => {
+app.get("/createMessage", authenticateToken, async (req, res) => {
     res.render("createMessage.ejs");
 });
 
@@ -97,15 +100,14 @@ app.get("/users", async (req, res) => {
 });
 
 function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies.accessToken;
 
     if (!token) {
-        return res.sendStatus(401);
+        return res.redirect('/login');
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) {
-            return res.sendStatus(403);
+            return res.redirect('/login');
         }
         req.user = user;
         next();
@@ -120,6 +122,7 @@ app.use((err, req, res, next) => {
 
 app.use(express.static("public"));
 
+const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

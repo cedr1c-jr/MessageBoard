@@ -50,7 +50,7 @@ export async function updatePassword(username, password) {
 };
 
 export async function pushRefreshToken(user_id, tokenHash, expires_at) {
-    const [result] = await db.query("INSERT INTO refreshtokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)", [user_id, tokenHash, expires_at]);
+    const [result] = await db.query("INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)", [user_id, tokenHash, expires_at]);
     return result.insertId;
 };
 

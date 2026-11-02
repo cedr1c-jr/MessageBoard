@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "devAuth": "nodemon authServer.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "db:up": "dbmate up",
+    "db:new": "dbmate new",
+    "db:status": "dbmate status",
+    "db:rollback": "dbmate rollback"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +17,8 @@
   "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "dotenv": "^18.0.9",
     "ejs": "^7.0.2",
     "express": "^5.3.0",
@@ -20,6 +26,7 @@
     "mysql2": "^3.24.6"
   },
   "devDependencies": {
+    "dbmate": "^2.37.0",
     "nodemon": "^3.1.14"
   }
 }
