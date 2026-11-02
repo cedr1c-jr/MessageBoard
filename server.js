@@ -23,28 +23,26 @@ app.get("/messages", async (req, res) => {
     res.render("messages.ejs", { messages });
 });
 
-app.get("/createMessage", authenticateToken, async (req, res) => {
+app.get("/createMessage", requirePage, async (req, res) => {
     res.render("createMessage.ejs");
 });
 
-app.post("/messages", async (req, res) => {
-    const data = req.body;
-    if (!data.username) {
-        data.username = "Anonymous";
-    }
-    data.user_id = 1; // Hardcoded user_id for demonstration purposes
-    await db.createMessage(data.user_id, data.message, data.username);
-    res.redirect("/messages");
+app.post("/messages", requireApi, async (req, res) => {
+    const username = req.body.username?.trim() || "Anonymous";
+    await db.createMessage(req.user.id, req.body.message, username);
+    res.status(201).json({ success: true });
 });
 
-app.delete("/messages/:id", async (req, res) => {
-    const id = +req.params.id;
-    const success = await db.deleteMessage(id);
-    if (success) {
-        res.status(200).send({ message: "Message deleted successfully" });
-    } else {
-        res.status(404).send({ message: "Message not found" });
+app.delete("/messages/:id", requireApi, async (req, res) => {
+    const message = await db.getMessageById(+req.params.id);
+    if (!message) {
+        return res.status(404).send({ message: "Message not found" });
     }
+    if (message.user_id !== req.user.id && req.user.role !== 'admin') {
+        return res.status(403).send({ message: "Forbidden" });
+    }
+    await db.deleteMessage(message.id);
+    res.status(200).send({ message: "Message deleted successfully" });
 });
 
 app.get("/login", async (req, res) => {
@@ -55,21 +53,21 @@ app.get("/register", async (req, res) => {
     res.render('register.ejs');
 });
 
-app.get("/myposts", authenticateToken, async (req, res) => {
+app.get("/myposts", requireApi, async (req, res) => {
     const posts = await db.getMessages();
     res.json(posts.filter(post => post.user_id === req.user.id));
 });
 
-app.post("/updatePassword", async (req, res) => {
-    const { username, password, confirmPassword } = req.body;
+app.post("/updatePassword", requirePage, async (req, res) => {
+    const { newPassword, confirmPassword } = req.body;
 
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
         return res.status(400).send("Passwords do not match");
     }
 
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-    await db.updatePassword(username, hashedPassword);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await db.updatePassword(req.user.username, hashedPassword);
     res.redirect("/login");
 });
 
@@ -94,24 +92,43 @@ app.post("/register", async (req, res) => {
     
 });
 
-app.get("/users", async (req, res) => {
+app.get("/users", requireApi, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).send("Forbidden");
+    }
     const users = await db.getUsers();
-    res.json(users);
+    res.json(users.map(({ password, ...user }) => user));
 });
 
-function authenticateToken(req, res, next) {
+function verifyAccess(req) {
     const token = req.cookies.accessToken;
 
     if (!token) {
-        return res.redirect('/login');
+        return null;
     }
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) {
-            return res.redirect('/login');
-        }
-        req.user = user;
-        next();
-    });
+    try {
+        return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    } catch {
+        return null;
+    }
+}
+
+function requirePage(req, res, next) {
+    const user = verifyAccess(req);
+    if (!user) {
+        return res.redirect('/login?next=' + encodeURIComponent(req.originalUrl));
+    }
+    req.user = user;
+    next();
+}
+
+function requireApi(req, res, next) {
+    const user = verifyAccess(req);
+    if (!user) {
+        return res.status(401).send("Unauthorized");
+    }
+    req.user = user;
+    next();
 }
 
 // Error Handling

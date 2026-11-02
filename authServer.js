@@ -56,7 +56,7 @@ app.post("/login", async (req, res) => {
 app.post("/token", async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-        res.sendStatus(401);
+        return res.sendStatus(401);
     }
     let payload;
     try {

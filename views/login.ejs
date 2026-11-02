@@ -25,6 +25,21 @@
     <a class="button" href="/register">Register</a>
 
     <script>
+        // Only allow same-site relative paths, to avoid an open redirect
+        const rawNext = new URLSearchParams(location.search).get('next') || '/messages';
+        const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/messages';
+
+        // Access token expired but refresh cookie still valid? Skip the form.
+        (async () => {
+            try {
+                const res = await fetch('http://localhost:4000/token', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (res.ok) window.location.href = next;
+            } catch {}
+        })();
+
         document.querySelector('form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = e.target.username.value;
@@ -38,7 +53,7 @@
             });
 
             if (res.ok) {
-                window.location.href = '/messages';
+                window.location.href = next;
             } else {
                 alert(await res.text());
             }

@@ -11,14 +11,34 @@
 
     <h1>Create Message</h1>
     
-    <form action="/messages" method="POST">
-        <label for="username">Username (leave blank to submit anonymously):</label>
-        <input type="text" id="username" name="username" placeholder="Username">
+    <form id="messageForm">
 
         <label for="message">Contents</label>
         <textarea id="message" name="message" cols="30" rows="10" placeholder="Message"></textarea>
 
         <button type="submit">Submit Message</button>
     </form>
+
+    <script src="/js/apiFetch.js"></script>
+    <script>
+        document.getElementById('messageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = e.target.username.value;
+            const message = e.target.message.value;
+
+            const res = await apiFetch('/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, message })
+            });
+
+            if (res.ok) {
+                window.location.href = '/messages';
+            } else if (res.status !== 401) {
+                // 401 means refresh failed and apiFetch is already redirecting to /login
+                alert('Could not submit message. Your draft is still here, so try again.');
+            }
+        });
+    </script>
 </body>
 </html>
