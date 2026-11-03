@@ -8,10 +8,15 @@
     <title>Document</title>
 </head>
 <body>
+    <%- include('partials/userMenu') %>
 
     <h1>Create Message</h1>
     
     <form id="messageForm">
+        <div>
+        <input type="checkbox" id="anonymous" name="anonymous" style="margin-bottom: 20px;">
+        <label for="anonymous">Submit anonymously</label>
+        </div>
 
         <label for="message">Contents</label>
         <textarea id="message" name="message" cols="30" rows="10" placeholder="Message"></textarea>
@@ -23,13 +28,13 @@
     <script>
         document.getElementById('messageForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = e.target.username.value;
+            const anonymous = e.target.anonymous.checked;
             const message = e.target.message.value;
 
             const res = await apiFetch('/messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, message })
+                body: JSON.stringify({ anonymous, message })
             });
 
             if (res.ok) {

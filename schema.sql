@@ -15,7 +15,7 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '8fd1ec66-d587-11f1-b7c5-6fa0d342cf49:1-23';
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '8fd1ec66-d587-11f1-b7c5-6fa0d342cf49:1-89';
 
 --
 -- Table structure for table `messages_table`

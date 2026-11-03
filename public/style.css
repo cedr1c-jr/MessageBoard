@@ -22,3 +22,27 @@ form {
 .button:hover {
     background-color: #eee;
 }
+
+.user-menu {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+}
+
+.user-menu .button {
+    margin-bottom: 0;
+    background: #fff;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.user-menu .button:hover {
+    background-color: #eee;
+}
+
+.user-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.25rem;
+}

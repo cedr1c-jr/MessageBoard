@@ -14,6 +14,11 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+    res.locals.user = verifyAccess(req);
+    next();
+});
+
 app.get("/", async (req, res) => {
     res.render("index.ejs");
 });
@@ -28,7 +33,11 @@ app.get("/createMessage", requirePage, async (req, res) => {
 });
 
 app.post("/messages", requireApi, async (req, res) => {
-    const username = req.body.username?.trim() || "Anonymous";
+    if (!req.body.message?.trim()) {
+        return res.status(400).send({ message: "Message cannot be empty" });
+    }
+
+    const username = req.body.anonymous === true ? "Anonymous" : req.user.username;
     await db.createMessage(req.user.id, req.body.message, username);
     res.status(201).json({ success: true });
 });

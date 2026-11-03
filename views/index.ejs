@@ -8,11 +8,23 @@
     <title>Document</title>
 </head>
 <body>
+    <%- include('partials/userMenu') %>
 
     <h1>My Message Board</h1>
     
     <a class="button" href="/messages">Go To Messages</a>
     <a class="button" href="/login">Login</a>
     <a class="button" href="/register">Register</a>
+    <!-- <button id="logout">Log out</button> -->
+
+<!-- <script>
+    document.getElementById('logout').addEventListener('click', async () => {
+        await fetch('http://localhost:4000/token/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        window.location.href = '/login';
+    }); 
+</script> -->
 </body>
 </html>

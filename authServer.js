@@ -53,6 +53,16 @@ app.post("/login", async (req, res) => {
     }
 });
 
+app.post("/token/logout", async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+        await db.deleteRefreshToken(hash(refreshToken));
+    }
+    res.clearCookie('accessToken', cookieBase);
+    res.clearCookie('refreshToken', { ...cookieBase, path: '/token' });
+    res.json({ success: true });
+})
+
 app.post("/token", async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {

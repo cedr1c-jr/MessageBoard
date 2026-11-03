@@ -1,0 +1,35 @@
+<% if (locals.user) { %>
+<div class="user-menu">
+    <button type="button" id="userMenuButton" class="button" aria-haspopup="true" aria-expanded="false">
+        <%= user.username %>
+    </button>
+    <div id="userMenuDropdown" class="user-menu-dropdown" hidden>
+        <button type="button" id="logoutButton" class="button">Log out</button>
+    </div>
+</div>
+
+<script>
+    const menuButton = document.getElementById('userMenuButton');
+    const menuDropdown = document.getElementById('userMenuDropdown');
+
+    menuButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuDropdown.hidden = !menuDropdown.hidden;
+        menuButton.setAttribute('aria-expanded', String(!menuDropdown.hidden));
+    });
+
+    // Click anywhere else to close
+    document.addEventListener('click', () => {
+        menuDropdown.hidden = true;
+        menuButton.setAttribute('aria-expanded', 'false');
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+        await fetch('http://localhost:4000/token/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        window.location.href = '/login';
+    });
+</script>
+<% } %>
